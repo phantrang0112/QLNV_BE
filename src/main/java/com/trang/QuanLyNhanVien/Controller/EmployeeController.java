@@ -35,26 +35,35 @@ public class EmployeeController {
 	EmployeeService employeeService;
 	
 	@GetMapping("")
-	public List<Employees> helloTrang() {
+	public List<Employees> GetEmployees() {
 		EmployeesExample employeesExample= new EmployeesExample();
 		List<Employees> listEmployees= employeeService.selectByExample(employeesExample);
 		return listEmployees;
 	}
-	
+	@GetMapping("/{id}")
+	public Employees GetEmployeeId(@PathVariable("id") int id) {
+		Employees Employee= employeeService.selectByPrimaryKey(id);
+		return Employee;
+	}
 	@PostMapping("")
-	public Employees postEmployee(@RequestBody Employees employees){
-		employeeService.insert(employees);
-		
-		return employees;
+	public Employees PostEmployee(@RequestBody Employees employees){
+		int succes=employeeService.insert(employees);
+		if(succes>0) {
+			return employees;
+		}
+		return null;
 	}
 	@PutMapping("/{id}")
-	public Employees editEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
+	public Employees EditEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
 		employees.setId(id);
-		employeeService.updateByPrimaryKey(employees);
-		return employees;
+		int succes =employeeService.updateByPrimaryKey(employees);
+		if(succes>0) {
+			return employees;
+		}
+		return null;
 	}
 	@DeleteMapping("/{id}")
-	public void delete(@PathVariable("id") int id) {
+	public void DeleteEmployee(@PathVariable("id") int id) {
 		employeeService.deleteByPrimaryKey(id);
 	}
 }

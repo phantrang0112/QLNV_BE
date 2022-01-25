@@ -63,8 +63,8 @@ public class EmployeeService implements EmployeesMapper {
 
 	@Override
 	public Employees selectByPrimaryKey(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
+		Employees Employee= employeesMapper.selectByPrimaryKey(id);
+		return Employee ;
 	}
 
 	@Override
