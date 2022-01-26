@@ -27,12 +27,14 @@ import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
 @RestController
+
 @RequestMapping("/Employee")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class EmployeeController {
 
 	@Autowired
 	EmployeeService employeeService;
+	
 	
 	@GetMapping("")
 	public List<Employees> GetEmployees() {
