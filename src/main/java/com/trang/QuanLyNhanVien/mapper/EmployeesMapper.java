@@ -74,4 +74,5 @@ public interface EmployeesMapper {
 	 * @mbg.generated  Tue Jan 25 17:04:21 ICT 2022
 	 */
 	int updateByPrimaryKey(Employees record);
+	List<Employees> selectEmployees();
 }

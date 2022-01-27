@@ -298,4 +298,10 @@
       img = #{img,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
+   
+  <select id="selectEmployees" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from employees
+  </select>
 </mapper>
