@@ -17,16 +17,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Value("${web.cors.allowed-origins}")
+	@Value("${web.cors.allowed-origins}")//lấy giá trị của local được cho phép sử dụng api
 	private String url;
-	@Value("${web.cors.allowed-methods}")
+	@Value("${web.cors.allowed-methods}")// lấy các method được phép sử dụng
 	private String[] method;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable().cors().configurationSource(request -> {
 			CorsConfiguration configuration = new CorsConfiguration();
-			configuration.setAllowedOrigins(Arrays.asList(url));
+			configuration.setAllowedOrigins(Arrays.asList(url));// nếu muốn cho phép tất cả thì thay url thành "*"
 			configuration.setAllowedMethods(Arrays.asList(method));
 			configuration.setAllowedHeaders(Arrays.asList("*"));
 			configuration.setAllowCredentials(true);
