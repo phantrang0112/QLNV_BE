@@ -1,6 +1,7 @@
 package com.trang.QuanLyNhanVien.Service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -37,5 +38,5 @@ public interface EmployeeService {
 
 	int updateByPrimaryKey(Employees record);
 	public List<Employees> listEmployees(int page, int pageSize);
-
+	Map<String, Object>login(Employees employee);
 }
