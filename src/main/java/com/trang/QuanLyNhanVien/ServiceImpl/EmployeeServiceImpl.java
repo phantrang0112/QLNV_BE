@@ -144,4 +144,20 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 
 	}
 
+	@Override
+	public List<Employees> listEmployeesSearch(int page, int pageSize,String name) {
+		List<Employees> result = null;
+		try {
+			PageHelper.startPage(page, pageSize);
+//            PageHelper.orderBy("id ASC");
+			EmployeesExample employeesExample= new EmployeesExample();
+			employeesExample.createCriteria().andNameLike(name);
+			result = employeesMapper.selectByExample(employeesExample);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
 }

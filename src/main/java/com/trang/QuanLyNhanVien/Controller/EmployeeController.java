@@ -87,4 +87,15 @@ public class EmployeeController {
 		
 		return usernameString ;
 	}
+	@GetMapping("/search/{name}")
+	 public PageInfo<Employees> search(@PathVariable("name") String name,
+	            @RequestParam(value="page", required=false, defaultValue="1") int page,
+	            @RequestParam(value="page-size", required=false, defaultValue="5") int pageSize){
+		System.out.println("tên nè:"+name);
+	        List<Employees> result = employeeService.listEmployeesSearch(page, pageSize, name);
+	        System.out.println(result.get(0).getName()+"ten nha"+result.size()+ "tên nè:"+ name);
+	        PageInfo<Employees> pi = new PageInfo<Employees>(result);
+	        System.out.println(pi.getEndRow()+"hhh"+pi.getSize());
+	        return pi;
+	    }
 }

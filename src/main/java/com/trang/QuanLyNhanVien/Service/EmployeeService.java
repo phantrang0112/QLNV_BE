@@ -39,4 +39,5 @@ public interface EmployeeService {
 	int updateByPrimaryKey(Employees record);
 	public List<Employees> listEmployees(int page, int pageSize);
 	Map<String, Object>login(Employees employee);
+	public List<Employees> listEmployeesSearch(int page,int pageSize, String name);
 }
