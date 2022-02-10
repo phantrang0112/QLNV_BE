@@ -18,7 +18,6 @@ import com.trang.QuanLyNhanVien.model.EmployeesExample;
 public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.EmployeeService {
 	@Autowired
 	EmployeesMapper employeesMapper;
-
 	@Override
 	public long countByExample(EmployeesExample example) {
 		// TODO Auto-generated method stub
@@ -46,6 +45,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	@Override
 	public int insert(Employees record) {
 		// TODO Auto-generated method stub
+	record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
 		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
 		if (employees == null) {
 			employeesMapper.insert(record);
@@ -88,7 +88,11 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 
 	@Override
 	public int updateByPrimaryKeySelective(Employees record) {
-		// TODO Auto-generated method stub
+		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
+		if (employees != null) {
+			employeesMapper.updateByPrimaryKeySelective(record);
+			return 1;
+		}
 		return 0;
 	}
 
@@ -124,8 +128,9 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
 		List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
 		if (listEmployee.size() > 0) {
-			if (listEmployee.get(0).getPassword().equals(employee.getPassword())) {
+			if (listEmployee.get(0).getPassword().equals(new BCryptPasswordEncoder().encode(employee.getPassword()))) {
 				paren.put("username", listEmployee.get(0).getUsername());
+				paren.put("id", listEmployee.get(0).getId());
 				paren.put("message", "Đăng nhập thành công");
 				paren.put("statusCode", 1);
 				return paren;
@@ -151,7 +156,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			PageHelper.startPage(page, pageSize);
 //            PageHelper.orderBy("id ASC");
 			EmployeesExample employeesExample= new EmployeesExample();
-			employeesExample.createCriteria().andNameLike(name);
+			employeesExample.createCriteria().andNameLike("%"+name+"%")  ;
 			result = employeesMapper.selectByExample(employeesExample);
 		} catch (Exception e) {
 			e.printStackTrace();

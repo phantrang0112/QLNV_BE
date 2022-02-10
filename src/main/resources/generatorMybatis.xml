@@ -28,6 +28,8 @@
 
     <table  tableName="employees" domainObjectName="Employees" >  
     </table>
+    <table  tableName="role" domainObjectName="Role" >  
+    </table>
 
   </context>
 </generatorConfiguration>

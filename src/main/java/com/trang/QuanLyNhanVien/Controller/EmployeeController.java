@@ -1,10 +1,16 @@
 package com.trang.QuanLyNhanVien.Controller;
 
+import java.io.Console;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import javax.websocket.server.PathParam;
 
+import org.omg.CORBA.portable.OutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.trang.QuanLyNhanVien.Service.EmployeeService;
 import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeServiceImpl;
@@ -34,13 +41,13 @@ public class EmployeeController {
 
 	@Autowired
 	EmployeeService employeeService;
-	
+	  private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
 	
 	@GetMapping("")
 	public List<Employees> GetEmployees() {
 		EmployeesExample employeesExample= new EmployeesExample();
 		List<Employees> listEmployees= employeeService.selectByExample(employeesExample);
-		return listEmployees;
+		return listEmployees; 
 	}
 	@GetMapping("/{id}")
 	public Employees GetEmployeeId(@PathVariable("id") int id) {
@@ -48,7 +55,18 @@ public class EmployeeController {
 		return Employee;
 	}
 	@PostMapping("")
-	public Employees PostEmployee(@RequestBody Employees employees){
+	public Employees PostEmployee(@RequestBody Employees employees,  @RequestParam MultipartFile image) throws IOException{
+		Path staticPath = Paths.get("static");
+        Path imagePath = Paths.get("images");
+        if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
+            Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
+        }
+        Path file = CURRENT_FOLDER.resolve(staticPath)
+                .resolve(imagePath).resolve(image.getOriginalFilename());
+        try (OutputStream os = (OutputStream) Files.newOutputStream(file)) {
+            os.write(image.getBytes());
+        }
+        employees.setImg(imagePath.resolve(image.getOriginalFilename()).toString());
 		int succes=employeeService.insert(employees);
 		if(succes>0) {
 			return employees;
@@ -58,7 +76,7 @@ public class EmployeeController {
 	@PutMapping("/{id}")
 	public Employees EditEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
 		employees.setId(id);
-		int succes =employeeService.updateByPrimaryKey(employees);
+		int succes =employeeService.updateByPrimaryKeySelective(employees);
 		if(succes>0) {
 			return employees;
 		}
