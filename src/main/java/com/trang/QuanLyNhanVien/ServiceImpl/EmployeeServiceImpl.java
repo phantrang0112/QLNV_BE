@@ -1,15 +1,18 @@
 package com.trang.QuanLyNhanVien.ServiceImpl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.trang.QuanLyNhanVien.mapper.EmployeesMapper;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
@@ -125,8 +128,10 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		// TODO Auto-generated method stub
 		EmployeesExample employeesExample = new EmployeesExample();
 		Map<String, Object> paren = new HashMap<String, Object>();
+		List<GrantedAuthority> grantedAuthorities= new ArrayList<GrantedAuthority>();
 		employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
 		List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
+		
 		if (listEmployee.size() > 0) {
 			if (listEmployee.get(0).getPassword().equals(new BCryptPasswordEncoder().encode(employee.getPassword()))) {
 				paren.put("username", listEmployee.get(0).getUsername());
@@ -163,6 +168,12 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		}
 
 		return result;
+	}
+
+	@Override
+	public UserDetails employDetails(Employees employees) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

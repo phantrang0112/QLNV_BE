@@ -8,37 +8,39 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import javax.websocket.server.PathParam;
-
 import org.omg.CORBA.portable.OutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trang.QuanLyNhanVien.Service.EmployeeService;
-import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeServiceImpl;
+import com.trang.QuanLyNhanVien.model.AuthRequest;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import com.github.pagehelper.PageInfo;
 
 @RestController
 @RequestMapping("/Employee")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class EmployeeController {
-
+	@Autowired
+    private com.trang.QuanLyNhanVien.Util.jwtUtil jwtUtil;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+	
 	@Autowired
 	EmployeeService employeeService;
 	  private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
@@ -48,6 +50,11 @@ public class EmployeeController {
 		EmployeesExample employeesExample= new EmployeesExample();
 		List<Employees> listEmployees= employeeService.selectByExample(employeesExample);
 		return listEmployees; 
+	}
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	@GetMapping("/test")
+	public String test() {
+		return "test";
 	}
 	@GetMapping("/{id}")
 	public Employees GetEmployeeId(@PathVariable("id") int id) {
@@ -116,4 +123,17 @@ public class EmployeeController {
 	        System.out.println(pi.getEndRow()+"hhh"+pi.getSize());
 	        return pi;
 	    }
+	  @PostMapping("/authenticate")
+	  public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
+		System.out.println("jhaks");
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
+            );
+        } catch (Exception ex) {
+            throw new Exception("inavalid username/password");
+        }
+       System.out.println(jwtUtil.generateToken(authRequest.getUserName()));
+        return jwtUtil.generateToken(authRequest.getUserName());
+    }
 }
