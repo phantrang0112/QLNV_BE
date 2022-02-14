@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.trang.QuanLyNhanVien.model.AuthRequest;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -39,7 +40,7 @@ public interface EmployeeService {
 
 	int updateByPrimaryKey(Employees record);
 	public List<Employees> listEmployees(int page, int pageSize);
-	Map<String, Object>login(Employees employee);
+	Map<String, Object>login(AuthRequest employee);
 	public List<Employees> listEmployeesSearch(int page,int pageSize, String name);
 	UserDetails employDetails(Employees employees);
 }

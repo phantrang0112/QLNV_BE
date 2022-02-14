@@ -15,24 +15,31 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeDetailService;
 import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeServiceImpl;
+import com.trang.QuanLyNhanVien.Util.jwtUtil;
+import com.trang.QuanLyNhanVien.filter.jwtfilter;
 
 @Configurable
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true,securedEnabled =true )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	EmployeeDetailService customerUserDetailService;
+	@Autowired
+	jwtfilter jwtfilter;
 	@Value("${web.cors.allowed-origins}")//lấy giá trị của local được cho phép sử dụng api
 	private String url;
 	@Value("${web.cors.allowed-methods}")// lấy các method được phép sử dụng
 	private String[] method;
+	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -50,7 +57,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //			source.registerCorsConfiguration("/**", configuration);
 //			return configuration;
 //		});
-		http.authorizeRequests().antMatchers("/Employee/**").permitAll().antMatchers("/Employee/test").hasRole("ADMIN").anyRequest().authenticated().and().formLogin().permitAll();
+		http.authorizeRequests()
+		.antMatchers("/Employee/authenticate").permitAll()
+		.antMatchers("/Employee/getPage","/Emplyee/").hasRole("ADMIN")
+		.anyRequest().authenticated()
+//		.and().formLogin().permitAll()
+		.and().exceptionHandling().and().sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+http.addFilterBefore(jwtfilter, UsernamePasswordAuthenticationFilter.class)
+		;
 	}
 	@Override
 	public void configure(WebSecurity web) throws Exception {
@@ -66,7 +81,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public AuthenticationManager authenticationManagerBean() throws Exception  {
 		return super.authenticationManagerBean();
 	}
-	
-
-
 }

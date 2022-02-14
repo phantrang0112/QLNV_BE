@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.github.pagehelper.PageHelper;
+import com.trang.QuanLyNhanVien.Util.jwtUtil;
 import com.trang.QuanLyNhanVien.mapper.EmployeesMapper;
+import com.trang.QuanLyNhanVien.model.AuthRequest;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -21,6 +25,11 @@ import com.trang.QuanLyNhanVien.model.EmployeesExample;
 public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.EmployeeService {
 	@Autowired
 	EmployeesMapper employeesMapper;
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	@Autowired
+	private com.trang.QuanLyNhanVien.Util.jwtUtil jwtUtil;
+
 	@Override
 	public long countByExample(EmployeesExample example) {
 		// TODO Auto-generated method stub
@@ -48,7 +57,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	@Override
 	public int insert(Employees record) {
 		// TODO Auto-generated method stub
-	record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
+		record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
 		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
 		if (employees == null) {
 			employeesMapper.insert(record);
@@ -124,44 +133,39 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	}
 
 	@Override
-	public Map<String, Object> login(Employees employee) {
+	public Map<String, Object> login(AuthRequest employee) {
 		// TODO Auto-generated method stub
 		EmployeesExample employeesExample = new EmployeesExample();
 		Map<String, Object> paren = new HashMap<String, Object>();
-		List<GrantedAuthority> grantedAuthorities= new ArrayList<GrantedAuthority>();
-		employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
-		List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
-		
-		if (listEmployee.size() > 0) {
-			if (listEmployee.get(0).getPassword().equals(new BCryptPasswordEncoder().encode(employee.getPassword()))) {
-				paren.put("username", listEmployee.get(0).getUsername());
-				paren.put("id", listEmployee.get(0).getId());
-				paren.put("message", "Đăng nhập thành công");
-				paren.put("statusCode", 1);
-				return paren;
-			} else {
-				paren.put("username", listEmployee.get(0).getUsername());
-				paren.put("message", "Sai mật khẩu");
-				paren.put("statusCode", 0);
-				return paren;
-			}
-		} else {
+
+		System.out.println(employee.getPassword() + employee.getUsername());
+		try {
+			authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(employee.getUsername(), employee.getPassword()));
+			employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
+			List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
+			paren.put("username", listEmployee.get(0).getUsername());
+			paren.put("id", listEmployee.get(0).getId());
+			paren.put("message", "Đăng nhập thành công");
+			paren.put("token", jwtUtil.generateToken(employee.getUsername()));
+			return paren;
+		} catch (Exception ex) {
 			paren.put("username", null);
 			paren.put("message", "Đăng nhập thất bại");
-			paren.put("statusCode", 0);
+			paren.put("token", null);
 			return paren;
 		}
 
 	}
 
 	@Override
-	public List<Employees> listEmployeesSearch(int page, int pageSize,String name) {
+	public List<Employees> listEmployeesSearch(int page, int pageSize, String name) {
 		List<Employees> result = null;
 		try {
 			PageHelper.startPage(page, pageSize);
 //            PageHelper.orderBy("id ASC");
-			EmployeesExample employeesExample= new EmployeesExample();
-			employeesExample.createCriteria().andNameLike("%"+name+"%")  ;
+			EmployeesExample employeesExample = new EmployeesExample();
+			employeesExample.createCriteria().andNameLike("%" + name + "%");
 			result = employeesMapper.selectByExample(employeesExample);
 		} catch (Exception e) {
 			e.printStackTrace();

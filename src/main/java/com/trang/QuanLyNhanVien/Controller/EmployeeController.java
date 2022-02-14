@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -27,23 +28,21 @@ import com.trang.QuanLyNhanVien.Service.EmployeeService;
 import com.trang.QuanLyNhanVien.model.AuthRequest;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.github.pagehelper.PageInfo;
 
 @RestController
 @RequestMapping("/Employee")
 @CrossOrigin(origins = "*")
+//@CrossOrigin
 public class EmployeeController {
-	@Autowired
-    private com.trang.QuanLyNhanVien.Util.jwtUtil jwtUtil;
-    @Autowired
-    private AuthenticationManager authenticationManager;
+
 	
 	@Autowired
 	EmployeeService employeeService;
-	  private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
+	 private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
 	
 	@GetMapping("")
 	public List<Employees> GetEmployees() {
@@ -51,36 +50,41 @@ public class EmployeeController {
 		List<Employees> listEmployees= employeeService.selectByExample(employeesExample);
 		return listEmployees; 
 	}
-	@PreAuthorize("hasAnyRole('ADMIN')")
+	
 	@GetMapping("/test")
-	public String test() {
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public String test(Principal principal) {
+		System.out.println(principal.getName());
 		return "test";
 	}
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	public Employees GetEmployeeId(@PathVariable("id") int id) {
 		Employees Employee= employeeService.selectByPrimaryKey(id);
 		return Employee;
 	}
-	@PostMapping("")
-	public Employees PostEmployee(@RequestBody Employees employees,  @RequestParam MultipartFile image) throws IOException{
-		Path staticPath = Paths.get("static");
-        Path imagePath = Paths.get("images");
-        if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
-            Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
-        }
-        Path file = CURRENT_FOLDER.resolve(staticPath)
-                .resolve(imagePath).resolve(image.getOriginalFilename());
-        try (OutputStream os = (OutputStream) Files.newOutputStream(file)) {
-            os.write(image.getBytes());
-        }
-        employees.setImg(imagePath.resolve(image.getOriginalFilename()).toString());
+	@PostMapping("add")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public Employees PostEmployee(@RequestBody Employees employees) throws IOException{
+//		Path staticPath = Paths.get("static");
+//        Path imagePath = Paths.get("images");
+//        if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
+//            Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
+//        }
+//        Path file = CURRENT_FOLDER.resolve(staticPath)
+//                .resolve(imagePath).resolve(image.getOriginalFilename());
+//        try (OutputStream os = (OutputStream) Files.newOutputStream(file)) {
+//            os.write(image.getBytes());
+//        }
+//        employees.setImg(imagePath.resolve(image.getOriginalFilename()).toString());
 		int succes=employeeService.insert(employees);
 		if(succes>0) {
 			return employees;
 		}
 		return null;
 	}
-	@PutMapping("/{id}")
+	@PutMapping("/edit/{id}")
+	@PreAuthorize("hashRole('ADMIN')")
 	public Employees EditEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
 		employees.setId(id);
 		int succes =employeeService.updateByPrimaryKeySelective(employees);
@@ -90,8 +94,10 @@ public class EmployeeController {
 		return null;
 	}
 	@DeleteMapping("/{id}")
-	public void DeleteEmployee(@PathVariable("id") int id) {
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public void DeleteEmployee(@PathVariable("id") int id,UserDetails userDetails) {
 		employeeService.deleteByPrimaryKey(id);
+		System.out.println(userDetails.getUsername());
 	}
 //	 @RequestMapping(value="/getPage", method = RequestMethod.GET)
 	@GetMapping("/getPage")
@@ -105,7 +111,7 @@ public class EmployeeController {
 	        return pi;
 	    }
 	@PostMapping("/login")
-	public Map<String, Object> login(@RequestBody Employees employee) {
+	public Map<String, Object> login(@RequestBody AuthRequest employee) {
 		System.out.println("pass:"+employee.getPassword()+"name:"+employee.getUsername());
 //		employee.setPassword(bcrypt.encode(employee.getPassword()));
 		Map<String, Object> usernameString= employeeService.login(employee);
@@ -124,16 +130,9 @@ public class EmployeeController {
 	        return pi;
 	    }
 	  @PostMapping("/authenticate")
-	  public String generateToken(@RequestBody AuthRequest authRequest) throws Exception {
-		System.out.println("jhaks");
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
-            );
-        } catch (Exception ex) {
-            throw new Exception("inavalid username/password");
-        }
-       System.out.println(jwtUtil.generateToken(authRequest.getUserName()));
-        return jwtUtil.generateToken(authRequest.getUserName());
+	  public Map<String,Object> generateToken(@RequestBody AuthRequest authRequest) throws Exception {
+		System.out.println(authRequest.getPassword()+authRequest.getUsername());
+		Map<String, Object> usernameString= employeeService.login(authRequest);
+		return usernameString;
     }
 }
