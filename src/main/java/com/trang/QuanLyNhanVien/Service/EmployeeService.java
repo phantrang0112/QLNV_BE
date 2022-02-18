@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.trang.QuanLyNhanVien.model.AuthRequest;
+import com.trang.QuanLyNhanVien.model.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -20,7 +21,7 @@ public interface EmployeeService {
 	int deleteByPrimaryKey(Integer id);
 
 	
-	int insert(Employees record);
+	Employees insert(EmployeeForm record);
 
 
 	int insertSelective(Employees record);

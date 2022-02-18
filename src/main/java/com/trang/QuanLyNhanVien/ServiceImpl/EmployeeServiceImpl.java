@@ -1,11 +1,14 @@
 package com.trang.QuanLyNhanVien.ServiceImpl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,11 +16,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.github.pagehelper.PageHelper;
 import com.trang.QuanLyNhanVien.Util.jwtUtil;
 import com.trang.QuanLyNhanVien.mapper.EmployeesMapper;
 import com.trang.QuanLyNhanVien.model.AuthRequest;
+import com.trang.QuanLyNhanVien.model.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -25,6 +31,8 @@ import com.trang.QuanLyNhanVien.model.EmployeesExample;
 public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.EmployeeService {
 	@Autowired
 	EmployeesMapper employeesMapper;
+	@Value("${upload.path}")
+    private String fileUpload;
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	@Autowired
@@ -55,15 +63,25 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	}
 
 	@Override
-	public int insert(Employees record) {
+	public Employees insert(EmployeeForm record) {
 		// TODO Auto-generated method stub
+		 Employees newEmployees= new Employees(  record.getName(),record.getPhone(),record.getAddress(),record.getAge(),record.getPassword(),
+				record.getUsername(), record.getRoleid());
+		MultipartFile multipartFile = record.getImg();
+        String fileName = multipartFile.getOriginalFilename();
+        try {
+            FileCopyUtils.copy(record.getImg().getBytes(), new File(this.fileUpload + fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        newEmployees.setImg(fileName);;
 		record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
 		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
 		if (employees == null) {
-			employeesMapper.insert(record);
-			return 1;
+			employeesMapper.insert(newEmployees);
+			return newEmployees;
 		}
-		return 0;
+		return null;
 	}
 
 	@Override

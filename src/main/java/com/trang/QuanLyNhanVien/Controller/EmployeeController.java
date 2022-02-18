@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.trang.QuanLyNhanVien.Service.EmployeeService;
 import com.trang.QuanLyNhanVien.model.AuthRequest;
+import com.trang.QuanLyNhanVien.model.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -64,22 +65,12 @@ public class EmployeeController {
 		return Employee;
 	}
 	@PostMapping("add")
-	@PreAuthorize("hasAnyRole('ADMIN')")
-	public Employees PostEmployee(@RequestBody Employees employees) throws IOException{
-//		Path staticPath = Paths.get("static");
-//        Path imagePath = Paths.get("images");
-//        if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
-//            Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
-//        }
-//        Path file = CURRENT_FOLDER.resolve(staticPath)
-//                .resolve(imagePath).resolve(image.getOriginalFilename());
-//        try (OutputStream os = (OutputStream) Files.newOutputStream(file)) {
-//            os.write(image.getBytes());
-//        }
-//        employees.setImg(imagePath.resolve(image.getOriginalFilename()).toString());
-		int succes=employeeService.insert(employees);
-		if(succes>0) {
-			return employees;
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
+	public Employees PostEmployee(@RequestBody EmployeeForm employees) throws IOException{
+
+		Employees newEmployees=employeeService.insert(employees);
+		if(newEmployees!=null) {
+			return newEmployees;
 		}
 		return null;
 	}

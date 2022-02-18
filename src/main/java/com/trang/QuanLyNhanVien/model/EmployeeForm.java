@@ -1,74 +1,43 @@
 package com.trang.QuanLyNhanVien.model;
 
-public class Employees {
+import org.springframework.web.multipart.MultipartFile;
 
-	
+public class EmployeeForm {
+	public EmployeeForm() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	private Integer id;
-	
+
 	private String name;
-	
+
 	private String phone;
-	
+
 	private String address;
-	
+
 	private Integer age;
-	
-	private String img;
-	
+
+	private MultipartFile img;
+
 	private String password;
-	
+
 	private String username;
-	
+
 	private Integer roleid;
 
-	
 	public Integer getId() {
 		return id;
 	}
 
-	
 	public void setId(Integer id) {
 		this.id = id;
 	}
-
-	public Employees( String name, String phone, String address, Integer age, String password,
-			String username, Integer roleid) {
-		super();
-		this.name = name;
-		this.phone = phone;
-		this.address = address;
-		this.age = age;
-		this.password = password;
-		this.username = username;
-		this.roleid = roleid;
-	}
-
-
-	public Employees(Integer id, String name, String phone, String address, Integer age, String img, String password,
-			String username, Integer roleid) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.phone = phone;
-		this.address = address;
-		this.age = age;
-		this.img = img;
-		this.password = password;
-		this.username = username;
-		this.roleid = roleid;
-	}
-
-
-	public Employees() {
-		super();
-	}
-
 
 	public String getName() {
 		return name;
 	}
 
-	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -77,12 +46,10 @@ public class Employees {
 		return phone;
 	}
 
-	
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
 
-	
 	public String getAddress() {
 		return address;
 	}
@@ -91,7 +58,6 @@ public class Employees {
 		this.address = address;
 	}
 
-	
 	public Integer getAge() {
 		return age;
 	}
@@ -101,16 +67,14 @@ public class Employees {
 	}
 
 	
-	public String getImg() {
+	public MultipartFile getImg() {
 		return img;
 	}
 
-	
-	public void setImg(String img) {
+	public void setImg(MultipartFile img) {
 		this.img = img;
 	}
 
-	
 	public String getPassword() {
 		return password;
 	}
@@ -134,4 +98,19 @@ public class Employees {
 	public void setRoleid(Integer roleid) {
 		this.roleid = roleid;
 	}
+
+	public EmployeeForm(Integer id, String name, String phone, String address, Integer age, MultipartFile img, String password,
+			String username, Integer roleid) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+		this.address = address;
+		this.age = age;
+		this.img = img;
+		this.password = password;
+		this.username = username;
+		this.roleid = roleid;
+	}
+
 }
