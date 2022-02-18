@@ -25,6 +25,44 @@ public class EmployeeForm {
 	private String username;
 
 	private Integer roleid;
+	private String email;
+
+	public EmployeeForm(String name, String phone, String address, Integer age, MultipartFile img, String password,
+			String username, Integer roleid, String email) {
+		super();
+		this.name = name;
+		this.phone = phone;
+		this.address = address;
+		this.age = age;
+		this.img = img;
+		this.password = password;
+		this.username = username;
+		this.roleid = roleid;
+		this.email = email;
+	}
+
+	public EmployeeForm(Integer id, String name, String phone, String address, Integer age, MultipartFile img,
+			String password, String username, Integer roleid, String email) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+		this.address = address;
+		this.age = age;
+		this.img = img;
+		this.password = password;
+		this.username = username;
+		this.roleid = roleid;
+		this.email = email;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	public Integer getId() {
 		return id;

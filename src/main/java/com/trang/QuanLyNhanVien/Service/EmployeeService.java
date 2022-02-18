@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.access.event.PublicInvocationEvent;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.trang.QuanLyNhanVien.model.AuthRequest;
@@ -44,4 +45,5 @@ public interface EmployeeService {
 	Map<String, Object>login(AuthRequest employee);
 	public List<Employees> listEmployeesSearch(int page,int pageSize, String name);
 	UserDetails employDetails(Employees employees);
+	public String register(Employees employee);
 }

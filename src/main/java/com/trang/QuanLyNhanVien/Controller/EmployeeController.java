@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trang.QuanLyNhanVien.Service.EmployeeService;
+import com.trang.QuanLyNhanVien.email.emailSender;
 import com.trang.QuanLyNhanVien.model.AuthRequest;
 import com.trang.QuanLyNhanVien.model.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
@@ -43,6 +44,7 @@ public class EmployeeController {
 	
 	@Autowired
 	EmployeeService employeeService;
+	
 	 private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
 	
 	@GetMapping("")
@@ -126,4 +128,12 @@ public class EmployeeController {
 		Map<String, Object> usernameString= employeeService.login(authRequest);
 		return usernameString;
     }
+	  @PostMapping("/register")
+	  public Employees register(@RequestBody Employees employee) {
+		  String success= employeeService.register(employee);
+		  if(success!=null) {
+			  return employee;
+		  }
+		  return null;
+	  }
 }
