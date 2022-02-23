@@ -21,11 +21,11 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.pagehelper.PageHelper;
+import com.trang.QuanLyNhanVien.DTO.AuthRequest;
+import com.trang.QuanLyNhanVien.DTO.EmployeeForm;
 import com.trang.QuanLyNhanVien.Util.jwtUtil;
 import com.trang.QuanLyNhanVien.email.emailSender;
 import com.trang.QuanLyNhanVien.mapper.EmployeesMapper;
-import com.trang.QuanLyNhanVien.model.AuthRequest;
-import com.trang.QuanLyNhanVien.model.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -69,10 +69,22 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	}
 
 	@Override
-	public Employees insert(EmployeeForm record) {
+	public Employees insert(Employees record) {
 		// TODO Auto-generated method stub
-		 Employees newEmployees= new Employees(record.getName(),record.getPhone(),record.getAddress(),record.getAge(),record.getPassword(),
-				record.getUsername(),record.getRoleid(),record.getEmail());
+		 Employees newEmployees= new Employees();
+		
+		record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
+		newEmployees= record;
+		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
+		if (employees == null) {
+			employeesMapper.insert(newEmployees);
+			return newEmployees;
+		}
+		return null;
+	}
+	@Override
+	public Employees uploadImg(EmployeeForm record) {
+		Employees updateEmployees= new Employees();
 		MultipartFile multipartFile = record.getImg();
         String fileName = multipartFile.getOriginalFilename();
         try {
@@ -80,12 +92,12 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
         } catch (IOException e) {
             e.printStackTrace();
         }
-        newEmployees.setImg(fileName);;
-		record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
+        updateEmployees.setImg(fileName);
+        updateEmployees.setId(record.getId());
 		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
-		if (employees == null) {
-			employeesMapper.insert(newEmployees);
-			return newEmployees;
+		if (employees != null) {
+			employeesMapper.updateByPrimaryKeySelective(updateEmployees);
+			return updateEmployees;
 		}
 		return null;
 	}
@@ -167,6 +179,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(employee.getUsername(), employee.getPassword()));
 			employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
+		
 			List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
 			paren.put("username", listEmployee.get(0).getUsername());
 			paren.put("id", listEmployee.get(0).getId());
@@ -174,6 +187,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			paren.put("token", jwtUtil.generateToken(employee.getUsername()));
 			return paren;
 		} catch (Exception ex) {
+			System.out.println(ex);
 			paren.put("username", null);
 			paren.put("message", "Đăng nhập thất bại");
 			paren.put("token", null);
@@ -213,8 +227,9 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
             throw new IllegalStateException("email not valid");
         }
         String token = jwtUtil.generateToken(employee.getUsername());
+        System.out.println("token: "+ token);
 
-        String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
+        String link = "http://localhost:8080/Employee/registration/confirm?token=" + token;
         emailSender.send(
                 employee.getEmail(),
                 buildEmail(employee.getUsername(), link));
@@ -289,5 +304,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
                 "\n" +
                 "</div></div>";
     }
+
+	
 
 }

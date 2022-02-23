@@ -1,4 +1,4 @@
-package com.trang.QuanLyNhanVien.model;
+package com.trang.QuanLyNhanVien.DTO;
 
 import org.springframework.web.multipart.MultipartFile;
 

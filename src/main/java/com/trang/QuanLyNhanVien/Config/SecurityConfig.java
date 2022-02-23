@@ -1,8 +1,5 @@
 package com.trang.QuanLyNhanVien.Config;
 
-import java.util.Arrays;
-
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,22 +16,20 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeDetailService;
-import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeServiceImpl;
-import com.trang.QuanLyNhanVien.Util.jwtUtil;
 import com.trang.QuanLyNhanVien.filter.jwtfilter;
+import lombok.AllArgsConstructor;
 
 @Configurable
 @EnableWebSecurity
+@AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true,securedEnabled =true )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	EmployeeDetailService customerUserDetailService;
 	@Autowired
 	jwtfilter jwtfilter;
+
 	@Value("${web.cors.allowed-origins}")//lấy giá trị của local được cho phép sử dụng api
 	private String url;
 	@Value("${web.cors.allowed-methods}")// lấy các method được phép sử dụng
@@ -58,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //			return configuration;
 //		});
 		http.authorizeRequests()
-		.antMatchers("/Employee/authenticate","").permitAll()
+		.antMatchers("/Employee/authenticate","/**").permitAll()
 		.antMatchers("/Employee/getPage","/Emplyee/").hasRole("ADMIN")
 		.anyRequest().authenticated()
 //		.and().formLogin().permitAll()
@@ -81,4 +76,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public AuthenticationManager authenticationManagerBean() throws Exception  {
 		return super.authenticationManagerBean();
 	}
+
 }

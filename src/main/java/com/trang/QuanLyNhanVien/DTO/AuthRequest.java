@@ -1,4 +1,4 @@
-package com.trang.QuanLyNhanVien.model;
+package com.trang.QuanLyNhanVien.DTO;
 
 
 public class AuthRequest {

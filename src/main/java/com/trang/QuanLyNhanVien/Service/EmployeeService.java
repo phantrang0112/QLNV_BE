@@ -7,8 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.security.access.event.PublicInvocationEvent;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.trang.QuanLyNhanVien.model.AuthRequest;
-import com.trang.QuanLyNhanVien.model.EmployeeForm;
+import com.trang.QuanLyNhanVien.DTO.AuthRequest;
+import com.trang.QuanLyNhanVien.DTO.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -22,7 +22,7 @@ public interface EmployeeService {
 	int deleteByPrimaryKey(Integer id);
 
 	
-	Employees insert(EmployeeForm record);
+	Employees insert(Employees record);
 
 
 	int insertSelective(Employees record);
@@ -46,4 +46,5 @@ public interface EmployeeService {
 	public List<Employees> listEmployeesSearch(int page,int pageSize, String name);
 	UserDetails employDetails(Employees employees);
 	public String register(Employees employee);
+	Employees uploadImg(EmployeeForm record);
 }

@@ -1,16 +1,15 @@
 package com.trang.QuanLyNhanVien.Controller;
 
-import java.io.Console;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import org.omg.CORBA.portable.OutputStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,14 +19,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.trang.QuanLyNhanVien.DTO.AuthRequest;
+import com.trang.QuanLyNhanVien.DTO.EmployeeForm;
 import com.trang.QuanLyNhanVien.Service.EmployeeService;
-import com.trang.QuanLyNhanVien.email.emailSender;
-import com.trang.QuanLyNhanVien.model.AuthRequest;
-import com.trang.QuanLyNhanVien.model.EmployeeForm;
 import com.trang.QuanLyNhanVien.model.Employees;
 import com.trang.QuanLyNhanVien.model.EmployeesExample;
 
@@ -66,11 +65,23 @@ public class EmployeeController {
 		Employees Employee= employeeService.selectByPrimaryKey(id);
 		return Employee;
 	}
-	@PostMapping("add")
+	@PostMapping("add" )
 	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
-	public Employees PostEmployee(@RequestBody EmployeeForm employees) throws IOException{
-
+	public Employees PostEmployee(@RequestBody Employees employees) throws IOException{
 		Employees newEmployees=employeeService.insert(employees);
+		if(newEmployees!=null) {
+			return newEmployees;
+		}
+		return null;
+	}
+	@PostMapping("upload" )
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
+	public Employees UploadImg(@RequestParam("file") MultipartFile file, @RequestParam("id") String id) throws IOException{
+	EmployeeForm  employees= new EmployeeForm();
+		employees.setImg(file);
+		employees.setId(Integer.parseInt(id));
+		System.out.println(file);
+		Employees newEmployees=employeeService.uploadImg(employees);
 		if(newEmployees!=null) {
 			return newEmployees;
 		}
@@ -130,7 +141,9 @@ public class EmployeeController {
     }
 	  @PostMapping("/register")
 	  public Employees register(@RequestBody Employees employee) {
+		  System.out.println("employee"+employee.getEmail());
 		  String success= employeeService.register(employee);
+		 
 		  if(success!=null) {
 			  return employee;
 		  }

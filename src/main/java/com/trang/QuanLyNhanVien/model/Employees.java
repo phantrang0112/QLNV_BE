@@ -292,5 +292,26 @@ public class Employees {
 		this.email = email;
 	}
 
+
+	public Employees() {
+		super();
+	}
+
+
+	public Employees(Integer id, String name, String phone, String address, Integer age, String img, String password,
+			String username, Integer roleid, String email) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+		this.address = address;
+		this.age = age;
+		this.img = img;
+		this.password = password;
+		this.username = username;
+		this.roleid = roleid;
+		this.email = email;
+	}
+
 	
 }
