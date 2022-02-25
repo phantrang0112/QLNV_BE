@@ -2,11 +2,12 @@ package com.trang.QuanLyNhanVien.ServiceImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.apache.commons.lang3.RandomStringUtils; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.github.pagehelper.PageHelper;
 import com.trang.QuanLyNhanVien.DTO.AuthRequest;
+import com.trang.QuanLyNhanVien.DTO.EmployeeChangePassword;
 import com.trang.QuanLyNhanVien.DTO.EmployeeForm;
 import com.trang.QuanLyNhanVien.Util.jwtUtil;
 import com.trang.QuanLyNhanVien.email.emailSender;
@@ -34,7 +37,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	@Autowired
 	EmployeesMapper employeesMapper;
 	@Value("${upload.path}")
-    private String fileUpload;
+	private String fileUpload;
 	@Autowired
 	private AuthenticationManager authenticationManager;
 	@Autowired
@@ -43,6 +46,8 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	EmailValidator emailValidator;
 	@Autowired
 	emailSender emailSender;
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	@Override
 	public long countByExample(EmployeesExample example) {
@@ -71,10 +76,10 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	@Override
 	public Employees insert(Employees record) {
 		// TODO Auto-generated method stub
-		 Employees newEmployees= new Employees();
-		
+		Employees newEmployees = new Employees();
+
 		record.setPassword(new BCryptPasswordEncoder().encode(record.getPassword()));
-		newEmployees= record;
+		newEmployees = record;
 		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
 		if (employees == null) {
 			employeesMapper.insert(newEmployees);
@@ -82,18 +87,19 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		}
 		return null;
 	}
+
 	@Override
 	public Employees uploadImg(EmployeeForm record) {
-		Employees updateEmployees= new Employees();
+		Employees updateEmployees = new Employees();
 		MultipartFile multipartFile = record.getImg();
-        String fileName = multipartFile.getOriginalFilename();
-        try {
-            FileCopyUtils.copy(record.getImg().getBytes(), new File(this.fileUpload + fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        updateEmployees.setImg(fileName);
-        updateEmployees.setId(record.getId());
+		String fileName = multipartFile.getOriginalFilename();
+		try {
+			FileCopyUtils.copy(record.getImg().getBytes(), new File(this.fileUpload + fileName));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		updateEmployees.setImg(fileName);
+		updateEmployees.setId(record.getId());
 		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
 		if (employees != null) {
 			employeesMapper.updateByPrimaryKeySelective(updateEmployees);
@@ -179,7 +185,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(employee.getUsername(), employee.getPassword()));
 			employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
-		
+
 			List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
 			paren.put("username", listEmployee.get(0).getUsername());
 			paren.put("id", listEmployee.get(0).getId());
@@ -219,92 +225,105 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	}
 
 	@Override
-	public String register(Employees employee) {
+	public Employees register(Employees employee) {
 		// TODO Auto-generated method stub
 		boolean isValidEmail = emailValidator.test(employee.getEmail());
 
-        if (!isValidEmail) {
-            throw new IllegalStateException("email not valid");
-        }
-        String token = jwtUtil.generateToken(employee.getUsername());
-        System.out.println("token: "+ token);
-
-        String link = "http://localhost:8080/Employee/registration/confirm?token=" + token;
-        emailSender.send(
-                employee.getEmail(),
-                buildEmail(employee.getUsername(), link));
-		return token;
+		if (!isValidEmail) {
+			throw new IllegalStateException("email not valid");
+		}
+//		String token = jwtUtil.generateToken(employee.getUsername());
+//		System.out.println("token: " + token);
+		
+		// link đã đăng nhập sau khi đăng kí xong
+//		String link = "http://localhost:8080/Employee/registration/confirm?token=" + token;
+		String password=RandomStringUtils.randomAlphanumeric(8);
+		employee.setPassword(passwordEncoder.encode(password));
+		employee.setRoleid(1);
+		int success=employeesMapper.insert(employee);
+		if(success==1) {
+			emailSender.send(employee.getEmail(), buildEmail(employee.getUsername(), password));
+			return employee;
+		}
+		
+		return null;
 	}
 	
-	private String buildEmail(String name, String link) {
-        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
-                "\n" +
-                "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>\n" +
-                "\n" +
-                "  <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td width=\"100%\" height=\"53\" bgcolor=\"#0b0c0c\">\n" +
-                "        \n" +
-                "        <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;max-width:580px\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\">\n" +
-                "          <tbody><tr>\n" +
-                "            <td width=\"70\" bgcolor=\"#0b0c0c\" valign=\"middle\">\n" +
-                "                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
-                "                  <tbody><tr>\n" +
-                "                    <td style=\"padding-left:10px\">\n" +
-                "                  \n" +
-                "                    </td>\n" +
-                "                    <td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">\n" +
-                "                      <span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Confirm your email</span>\n" +
-                "                    </td>\n" +
-                "                  </tr>\n" +
-                "                </tbody></table>\n" +
-                "              </a>\n" +
-                "            </td>\n" +
-                "          </tr>\n" +
-                "        </tbody></table>\n" +
-                "        \n" +
-                "      </td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table>\n" +
-                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td width=\"10\" height=\"10\" valign=\"middle\"></td>\n" +
-                "      <td>\n" +
-                "        \n" +
-                "                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
-                "                  <tbody><tr>\n" +
-                "                    <td bgcolor=\"#1D70B8\" width=\"100%\" height=\"10\"></td>\n" +
-                "                  </tr>\n" +
-                "                </tbody></table>\n" +
-                "        \n" +
-                "      </td>\n" +
-                "      <td width=\"10\" valign=\"middle\" height=\"10\"></td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table>\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td height=\"30\"><br></td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
-                "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
-                "        \n" +
-                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + link + "\">Activate Now</a> </p></blockquote>\n Link will expire in 15 minutes. <p>See you soon</p>" +
-                "        \n" +
-                "      </td>\n" +
-                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td height=\"30\"><br></td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table><div class=\"yj6qo\"></div><div class=\"adL\">\n" +
-                "\n" +
-                "</div></div>";
-    }
+	private String buildEmail(String name, String password) {
+		return "<body marginheight=\"0\" topmargin=\"0\" marginwidth=\"0\" style=\"margin: 0px; background-color: #f2f3f8;\" leftmargin=\"0\">"+
+				"    <table cellspacing=\"0\" border=\"0\" cellpadding=\"0\" width=\"100%\" bgcolor=\"#f2f3f8\""+
+				 "       style=\"@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;\">"+
+				  "      <tr> <td><table style=\"background-color: #f2f3f8; max-width:670px;  margin:0 auto;\" width=\"100%\" border=\"0\"align=\"center\" cellpadding=\"0\" cellspacing=\"0\">"+
+				   "                 <tr><td style=\"height:80px;\">&nbsp;</td></tr>"+
+				    "                <tr><td style=\"text-align:center;\"><a href=\"#\" title=\"logo\" target=\"_blank\">"+
+				     "                       <img width=\"60\" src=\"https://i.ibb.co/hL4XZp2/android-chrome-192x192.png\" title=\"logo\" alt=\"logo\"></a></td></tr>"+
+				      "              <tr><td style=\"height:20px;\">&nbsp;</td></tr><tr><td>"+
+				"                            <table width=\"95%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"style=\"max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);\">"+
+				 "                               <tr><td style=\"height:40px;\">&nbsp;</td></tr><tr><td style=\"padding:0 35px;\">"+
+				  "                                      <h1 style=\"color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;\">Hi " +name+"</h1>"+
+				 "                                       <span style=\"display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;\"></span>"+
+				 "                                       <p style=\"color:#455056; font-size:15px;line-height:24px; margin:0;\"> Thank you for registering an account. <br>Please login with password: "+"<b>"+password+"</b>"+
+				 "                                        </p><p style=\"background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;\">Thank You</p>"+
+				 "                                   </td></tr><tr><td style=\"height:40px;\">&nbsp;</td></tr>"+
+				 "                           </table></td><tr><td style=\"height:20px;\">&nbsp;</td></tr>"+
+				  "                  <tr><td style=\"text-align:center;\"><p style=\"font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;\">&copy; <strong>phantrang151220@gmail.com</strong></p>"+
+				  "                      </td></tr><tr><td style=\"height:80px;\">&nbsp;</td>"+
+				  "                  </tr></table></td></tr></table></body>";
+	}
 
-	
-
+	@Override
+	public Map<String, Object>  changePassword(EmployeeChangePassword employee) {
+		String token=null;
+		Map<String, Object> paren = new HashMap<String, Object>();
+		if (employee != null) {
+			EmployeesExample employeesExample = new EmployeesExample();
+			employeesExample.createCriteria().andUsernameEqualTo(employee.getUsername());
+			
+			List<Employees> employees = employeesMapper.selectByExample(employeesExample);
+			boolean check=passwordEncoder.matches(employee.getOldPassword(), employees.get(0).getPassword());
+			System.out.println("trang1"+employees.size()+employees.get(0).getPassword()+"   "+employees.get(0).getAddress()+passwordEncoder.encode(employee.getOldPassword())+check);
+			if (employees.get(0) != null) {
+				System.out.println(employees.get(0).getUsername());
+				if(passwordEncoder.matches(employee.getOldPassword(), employees.get(0).getPassword())){
+					System.out.println("trang1");
+					emailSender.send(employees.get(0).getEmail(), emailChangePassword(employees.get(0).getUsername()));
+					employees.get(0).setPassword(passwordEncoder.encode(employee.getNewPassword()));
+					employeesMapper.updateByPrimaryKeySelective(employees.get(0));
+					paren.put("username", employees.get(0).getUsername());
+					paren.put("id", employees.get(0).getId());
+					paren.put("message", "Đổi mật khẩu thành công!");
+					paren.put("token", jwtUtil.generateToken(employee.getUsername()));
+					return paren;
+				
+					
+				}
+			}
+		}
+		paren.put("username", employee.getUsername());
+		paren.put("message", "Đổi mật khẩu thất bại");
+		return paren;
+	}
+	private String emailChangePassword(String username)
+	{
+		LocalDate date= LocalDate.now();
+		return "<body marginheight=\"0\" topmargin=\"0\" marginwidth=\"0\" style=\"margin: 0px; background-color: #f2f3f8;\" leftmargin=\"0\">"+
+				"    <table cellspacing=\"0\" border=\"0\" cellpadding=\"0\" width=\"100%\" bgcolor=\"#f2f3f8\""+
+				 "       style=\"@import url(https://fonts.googleapis.com/css?family=Rubik:300,400,500,700|Open+Sans:300,400,600,700); font-family: 'Open Sans', sans-serif;\">"+
+				  "      <tr> <td><table style=\"background-color: #f2f3f8; max-width:670px;  margin:0 auto;\" width=\"100%\" border=\"0\"align=\"center\" cellpadding=\"0\" cellspacing=\"0\">"+
+				   "                 <tr><td style=\"height:80px;\">&nbsp;</td></tr>"+
+				    "                <tr><td style=\"text-align:center;\"><a href=\"#\" title=\"logo\" target=\"_blank\">"+
+				     "                       <img width=\"60\" src=\"https://i.ibb.co/hL4XZp2/android-chrome-192x192.png\" title=\"logo\" alt=\"logo\"></a></td></tr>"+
+				      "              <tr><td style=\"height:20px;\">&nbsp;</td></tr><tr><td>"+
+				"                            <table width=\"95%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"style=\"max-width:670px;background:#fff; border-radius:3px; text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);\">"+
+				 "                               <tr><td style=\"height:40px;\">&nbsp;</td></tr><tr><td style=\"padding:0 35px;\">"+
+				  "                                      <h1 style=\"color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;\">You have requested to reset your password</h1>"+
+				 "                                       <span style=\"display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;\"></span>"+
+				 "                                       <p style=\"color:#455056; font-size:15px;line-height:24px; margin:0;\"> We have received a request to change password associated with your account at Website on "+date+
+				 "                                        </p><p style=\"background:#20e277;text-decoration:none !important; font-weight:500; margin-top:35px; color:#fff;text-transform:uppercase; font-size:14px;padding:10px 24px;display:inline-block;border-radius:50px;\">Thank You</p>"+
+				 "                                   </td></tr><tr><td style=\"height:40px;\">&nbsp;</td></tr>"+
+				 "                           </table></td><tr><td style=\"height:20px;\">&nbsp;</td></tr>"+
+				  "                  <tr><td style=\"text-align:center;\"><p style=\"font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;\">&copy; <strong>phantrang151220@gmail.com</strong></p>"+
+				  "                      </td></tr><tr><td style=\"height:80px;\">&nbsp;</td>"+
+				  "                  </tr></table></td></tr></table></body>";
+	}
 }

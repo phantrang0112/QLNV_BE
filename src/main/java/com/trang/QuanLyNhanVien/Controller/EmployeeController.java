@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.trang.QuanLyNhanVien.DTO.AuthRequest;
+import com.trang.QuanLyNhanVien.DTO.EmployeeChangePassword;
 import com.trang.QuanLyNhanVien.DTO.EmployeeForm;
 import com.trang.QuanLyNhanVien.Service.EmployeeService;
 import com.trang.QuanLyNhanVien.model.Employees;
@@ -36,8 +37,8 @@ import com.github.pagehelper.PageInfo;
 
 @RestController
 @RequestMapping("/Employee")
-@CrossOrigin(origins = "*")
-//@CrossOrigin
+//@CrossOrigin(origins = "*")
+@CrossOrigin
 public class EmployeeController {
 
 	
@@ -88,7 +89,7 @@ public class EmployeeController {
 		return null;
 	}
 	@PutMapping("/edit/{id}")
-	@PreAuthorize("hashRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	public Employees EditEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
 		employees.setId(id);
 		int succes =employeeService.updateByPrimaryKeySelective(employees);
@@ -142,11 +143,16 @@ public class EmployeeController {
 	  @PostMapping("/register")
 	  public Employees register(@RequestBody Employees employee) {
 		  System.out.println("employee"+employee.getEmail());
-		  String success= employeeService.register(employee);
-		 
-		  if(success!=null) {
-			  return employee;
+		  Employees employees= employeeService.register(employee);
+		  if(employees!=null) {
+			  return employees;
 		  }
 		  return null;
 	  }
+	  @PutMapping("/changepass")
+	  public  Map<String,Object> changePassword(@RequestBody EmployeeChangePassword employeeChangePassword) {
+		  Map<String, Object> success= employeeService.changePassword(employeeChangePassword);
+			  return success;
+	  }
+
 }

@@ -1,5 +1,7 @@
 package com.trang.QuanLyNhanVien.Config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +18,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import com.trang.QuanLyNhanVien.ServiceImpl.EmployeeDetailService;
 import com.trang.QuanLyNhanVien.filter.jwtfilter;
+
+
 import lombok.AllArgsConstructor;
 
 @Configurable
@@ -41,20 +48,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().cors().disable();
-//		.configurationSource(request -> {
-//			CorsConfiguration configuration = new CorsConfiguration();
-//			configuration.setAllowedOrigins(Arrays.asList(url));// nếu muốn cho phép tất cả thì thay url thành "*"
-//			configuration.setAllowedMethods(Arrays.asList(method));
-//			configuration.setAllowedHeaders(Arrays.asList("*"));
-//			configuration.setAllowCredentials(true);
-//			UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//			source.registerCorsConfiguration("/**", configuration);
-//			return configuration;
-//		});
+		http.csrf().disable().cors()
+		.configurationSource(request -> {
+			CorsConfiguration configuration = new CorsConfiguration();
+			configuration.setAllowedOrigins(Arrays.asList(url));// nếu muốn cho phép tất cả thì thay url thành "*"
+			configuration.setAllowedMethods(Arrays.asList(method));
+			configuration.setAllowedHeaders(Arrays.asList("*"));
+			configuration.setAllowCredentials(true);
+			UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+			source.registerCorsConfiguration("/**", configuration);
+			return configuration;
+		});
 		http.authorizeRequests()
-		.antMatchers("/Employee/authenticate","/**").permitAll()
-		.antMatchers("/Employee/getPage","/Emplyee/").hasRole("ADMIN")
+		.antMatchers("/Employee/authenticate","/Employee/login","/Employee/register/**").permitAll()
+//		.antMatchers("/Employee/getPage","/Emplyee/").hasRole("ADMIN")
 		.anyRequest().authenticated()
 //		.and().formLogin().permitAll()
 		.and().exceptionHandling().and().sessionManagement()
