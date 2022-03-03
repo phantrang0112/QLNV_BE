@@ -41,7 +41,6 @@ import com.github.pagehelper.PageInfo;
 @CrossOrigin
 public class EmployeeController {
 
-	
 	@Autowired
 	EmployeeService employeeService;
 	
@@ -75,12 +74,14 @@ public class EmployeeController {
 		}
 		return null;
 	}
-	@PostMapping("upload" )
+	@PostMapping("/upload/{id}" )
 	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
-	public Employees UploadImg(@RequestParam("file") MultipartFile file, @RequestParam("id") String id) throws IOException{
-	EmployeeForm  employees= new EmployeeForm();
+	public Employees UploadImg(@RequestParam("file") MultipartFile file, @PathVariable("id") int id) throws IOException{
+		System.out.println("hello");
+		EmployeeForm  employees= new EmployeeForm();
 		employees.setImg(file);
-		employees.setId(Integer.parseInt(id));
+		employees.setId(id);
+
 		System.out.println(file);
 		Employees newEmployees=employeeService.uploadImg(employees);
 		if(newEmployees!=null) {
@@ -100,9 +101,9 @@ public class EmployeeController {
 	}
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAnyRole('ADMIN')")
-	public void DeleteEmployee(@PathVariable("id") int id,UserDetails userDetails) {
+	public void DeleteEmployee(@PathVariable("id") int id) {
 		employeeService.deleteByPrimaryKey(id);
-		System.out.println(userDetails.getUsername());
+//		System.out.println(userDetails.getUsername());
 	}
 //	 @RequestMapping(value="/getPage", method = RequestMethod.GET)
 	@GetMapping("/getPage")
