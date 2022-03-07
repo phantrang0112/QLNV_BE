@@ -46,7 +46,7 @@ public class EmployeeController {
 	
 	 private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
 	
-	@GetMapping("")
+	@GetMapping("/all")
 	public List<Employees> GetEmployees() {
 		EmployeesExample employeesExample= new EmployeesExample();
 		List<Employees> listEmployees= employeeService.selectByExample(employeesExample);
