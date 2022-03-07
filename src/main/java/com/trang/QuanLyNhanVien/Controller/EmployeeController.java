@@ -65,12 +65,15 @@ public class EmployeeController {
 		Employees Employee= employeeService.selectByPrimaryKey(id);
 		return Employee;
 	}
-	@PostMapping("add" )
-	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
+	@PostMapping("" )
+	@PreAuthorize("hasAnyRole('ADMIN')")
 	public Employees PostEmployee(@RequestBody Employees employees) throws IOException{
-		Employees newEmployees=employeeService.insert(employees);
-		if(newEmployees!=null) {
-			return newEmployees;
+		if(employees!=null) {
+			employees.setRoleid(1);
+			Employees newEmployees = employeeService.insert(employees);
+			if (newEmployees != null) {
+				return newEmployees;
+			}
 		}
 		return null;
 	}

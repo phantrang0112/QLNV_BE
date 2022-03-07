@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.RandomStringUtils; 
+
+import com.trang.QuanLyNhanVien.mapper.RoleMapper;
+import com.trang.QuanLyNhanVien.model.Role;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,6 +51,8 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 	emailSender emailSender;
 	@Autowired
 	PasswordEncoder passwordEncoder;
+	@Autowired
+	RoleMapper roleMapper;
 
 	@Override
 	public long countByExample(EmployeesExample example) {
@@ -179,6 +184,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		// TODO Auto-generated method stub
 		EmployeesExample employeesExample = new EmployeesExample();
 		Map<String, Object> paren = new HashMap<String, Object>();
+		Role role;
 
 		System.out.println(employee.getPassword() + employee.getUsername());
 		try {
@@ -191,6 +197,8 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			paren.put("id", listEmployee.get(0).getId());
 			paren.put("message", "Đăng nhập thành công");
 			paren.put("token", jwtUtil.generateToken(employee.getUsername()));
+			role= roleMapper.SelectById(listEmployee.get(0).getRoleid());
+			paren.put("role",role.getRole());
 			return paren;
 		} catch (Exception ex) {
 			System.out.println(ex);
@@ -239,7 +247,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 //		String link = "http://localhost:8080/Employee/registration/confirm?token=" + token;
 		String password=RandomStringUtils.randomAlphanumeric(8);
 		employee.setPassword(passwordEncoder.encode(password));
-		employee.setRoleid(1);
+		employee.setRoleid(2);
 		int success=employeesMapper.insert(employee);
 		if(success==1) {
 			emailSender.send(employee.getEmail(), buildEmail(employee.getUsername(), password));
