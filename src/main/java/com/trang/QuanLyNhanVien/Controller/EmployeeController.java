@@ -43,9 +43,6 @@ public class EmployeeController {
 
 	@Autowired
 	EmployeeService employeeService;
-	
-	 private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
-	
 	@GetMapping("/all")
 	public List<Employees> GetEmployees() {
 		EmployeesExample employeesExample= new EmployeesExample();
@@ -84,8 +81,6 @@ public class EmployeeController {
 		EmployeeForm  employees= new EmployeeForm();
 		employees.setImg(file);
 		employees.setId(id);
-
-		System.out.println(file);
 		Employees newEmployees=employeeService.uploadImg(employees);
 		if(newEmployees!=null) {
 			return newEmployees;
@@ -93,7 +88,7 @@ public class EmployeeController {
 		return null;
 	}
 	@PutMapping("/edit/{id}")
-	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
+	@PreAuthorize("hasAnyRole('ADMIN') ")
 	public Employees EditEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
 		employees.setId(id);
 		int succes =employeeService.updateByPrimaryKeySelective(employees);
@@ -114,7 +109,6 @@ public class EmployeeController {
 	            @RequestParam(value="page", required=false, defaultValue="1") int page,
 	            @RequestParam(value="page-size", required=false, defaultValue="5") int pageSize){
 	        List<Employees> result = employeeService.listEmployees(page,pageSize);
-	        System.out.println(result.get(0).getName()+"ten nha"+result.size());
 	        PageInfo<Employees> pi = new PageInfo<Employees>(result);
 	        System.out.println(pi.getEndRow()+"hhh"+pi.getSize());
 	        return pi;
@@ -128,6 +122,7 @@ public class EmployeeController {
 		return usernameString ;
 	}
 	@GetMapping("/search/{name}")
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	 public PageInfo<Employees> search(@PathVariable("name") String name,
 	            @RequestParam(value="page", required=false, defaultValue="1") int page,
 	            @RequestParam(value="page-size", required=false, defaultValue="5") int pageSize){
@@ -154,6 +149,7 @@ public class EmployeeController {
 		  return null;
 	  }
 	  @PutMapping("/changepass")
+	  @PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	  public  Map<String,Object> changePassword(@RequestBody EmployeeChangePassword employeeChangePassword) {
 		  Map<String, Object> success= employeeService.changePassword(employeeChangePassword);
 			  return success;
