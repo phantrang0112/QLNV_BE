@@ -367,5 +367,11 @@
     select 
     <include refid="Base_Column_List" />
     from employees
+    order by age ASC
+  </select>
+  <select id="selectSortEmployee">
+     select *
+    from employees
+
   </select>
 </mapper>

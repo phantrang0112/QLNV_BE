@@ -49,4 +49,5 @@ public interface EmployeeService {
 	public Employees register(Employees employee);
 	Employees uploadImg(EmployeeForm record);
 	Map<String, Object>  changePassword(EmployeeChangePassword employee);
+	List<Employees> sort();
 }

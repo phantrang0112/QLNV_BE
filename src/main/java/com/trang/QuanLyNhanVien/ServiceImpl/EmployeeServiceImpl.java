@@ -309,6 +309,13 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		paren.put("message", "Đổi mật khẩu thất bại");
 		return paren;
 	}
+
+	@Override
+	public List<Employees> sort() {
+		EmployeesExample employeesExample= new EmployeesExample();
+		return null;
+	}
+
 	private String emailChangePassword(String username)
 	{
 		LocalDate date= LocalDate.now();
@@ -330,4 +337,5 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 				  "                      </td></tr><tr><td style=\"height:80px;\">&nbsp;</td>"+
 				  "                  </tr></table></td></tr></table></body>";
 	}
+
 }
