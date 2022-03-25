@@ -118,7 +118,6 @@ public class EmployeeController {
 		System.out.println("pass:"+employee.getPassword()+"name:"+employee.getUsername());
 //		employee.setPassword(bcrypt.encode(employee.getPassword()));
 		Map<String, Object> usernameString= employeeService.login(employee);
-		
 		return usernameString ;
 	}
 	@GetMapping("/search/{name}")
