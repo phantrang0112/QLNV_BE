@@ -35,13 +35,11 @@ public class EmployeeDetailService implements UserDetailsService {
 			Role role= roleMapper.SelectById(listUser.get(0).getRoleid());
 			GrantedAuthority authority= new SimpleGrantedAuthority("ROLE_"+role.getRole());//muốn có nhiều quyền thì add thêm nhiều authority
 			grantedAuthorities.add(authority);
-			
 			UserDetails userDetails= new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),grantedAuthorities);
-			System.out.println(userDetails.getAuthorities());
 			return userDetails;
 		}
 		else {
-			new UsernameNotFoundException("Đăng nhập không thành công");
+			new UsernameNotFoundException("Login unsuccessful");
 		}
 		return null;
 	}

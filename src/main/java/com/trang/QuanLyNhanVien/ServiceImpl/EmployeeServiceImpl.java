@@ -185,8 +185,6 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		EmployeesExample employeesExample = new EmployeesExample();
 		Map<String, Object> paren = new HashMap<String, Object>();
 		Role role;
-
-		System.out.println(employee.getPassword() + employee.getUsername());
 		try {
 			authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(employee.getUsername(), employee.getPassword()));
@@ -195,15 +193,14 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			List<Employees> listEmployee = employeesMapper.selectByExample(employeesExample);
 			paren.put("username", listEmployee.get(0).getUsername());
 			paren.put("id", listEmployee.get(0).getId());
-			paren.put("message", "Đăng nhập thành công");
+			paren.put("message", "Logged in successfully");
 			paren.put("token", jwtUtil.generateToken(employee.getUsername()));
 			role= roleMapper.SelectById(listEmployee.get(0).getRoleid());
 			paren.put("role",role.getRole());
 			return paren;
 		} catch (Exception ex) {
-			System.out.println(ex);
 			paren.put("username", null);
-			paren.put("message", "Đăng nhập thất bại");
+			paren.put("message", "Login failed");
 			paren.put("token", null);
 			return paren;
 		}
@@ -287,11 +284,8 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			
 			List<Employees> employees = employeesMapper.selectByExample(employeesExample);
 			boolean check=passwordEncoder.matches(employee.getOldPassword(), employees.get(0).getPassword());
-			System.out.println("trang1"+employees.size()+employees.get(0).getPassword()+"   "+employees.get(0).getAddress()+passwordEncoder.encode(employee.getOldPassword())+check);
 			if (employees.get(0) != null) {
-				System.out.println(employees.get(0).getUsername());
 				if(passwordEncoder.matches(employee.getOldPassword(), employees.get(0).getPassword())){
-					System.out.println("trang1");
 					emailSender.send(employees.get(0).getEmail(), emailChangePassword(employees.get(0).getUsername()));
 					employees.get(0).setPassword(passwordEncoder.encode(employee.getNewPassword()));
 					employeesMapper.updateByPrimaryKeySelective(employees.get(0));
@@ -306,7 +300,7 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 			}
 		}
 		paren.put("username", employee.getUsername());
-		paren.put("message", "Đổi mật khẩu thất bại");
+		paren.put("message", "Change password failed");
 		return paren;
 	}
 

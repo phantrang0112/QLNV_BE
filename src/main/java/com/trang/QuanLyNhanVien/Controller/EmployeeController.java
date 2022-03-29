@@ -53,7 +53,6 @@ public class EmployeeController {
 	@GetMapping("/test")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public String test(Principal principal) {
-		System.out.println(principal.getName());
 		return "test";
 	}
 	@GetMapping("/{id}")
@@ -77,7 +76,6 @@ public class EmployeeController {
 	@PostMapping("/upload/{id}" )
 	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	public Employees UploadImg(@RequestParam("file") MultipartFile file, @PathVariable("id") int id) throws IOException{
-		System.out.println("hello");
 		EmployeeForm  employees= new EmployeeForm();
 		employees.setImg(file);
 		employees.setId(id);
@@ -110,13 +108,10 @@ public class EmployeeController {
 	            @RequestParam(value="page-size", required=false, defaultValue="5") int pageSize){
 	        List<Employees> result = employeeService.listEmployees(page,pageSize);
 	        PageInfo<Employees> pi = new PageInfo<Employees>(result);
-	        System.out.println(pi.getEndRow()+"hhh"+pi.getSize());
 	        return pi;
 	    }
 	@PostMapping("/login")
 	public Map<String, Object> login(@RequestBody AuthRequest employee) {
-		System.out.println("pass:"+employee.getPassword()+"name:"+employee.getUsername());
-//		employee.setPassword(bcrypt.encode(employee.getPassword()));
 		Map<String, Object> usernameString= employeeService.login(employee);
 		return usernameString ;
 	}
@@ -125,22 +120,17 @@ public class EmployeeController {
 	 public PageInfo<Employees> search(@PathVariable("name") String name,
 	            @RequestParam(value="page", required=false, defaultValue="1") int page,
 	            @RequestParam(value="page-size", required=false, defaultValue="5") int pageSize){
-		System.out.println("tên nè:"+name);
 	        List<Employees> result = employeeService.listEmployeesSearch(page, pageSize, name);
-	        System.out.println(result.get(0).getName()+"ten nha"+result.size()+ "tên nè:"+ name);
 	        PageInfo<Employees> pi = new PageInfo<Employees>(result);
-	        System.out.println(pi.getEndRow()+"hhh"+pi.getSize());
 	        return pi;
 	    }
 	  @PostMapping("/authenticate")
 	  public Map<String,Object> generateToken(@RequestBody AuthRequest authRequest) throws Exception {
-		System.out.println(authRequest.getPassword()+authRequest.getUsername());
 		Map<String, Object> usernameString= employeeService.login(authRequest);
 		return usernameString;
     }
 	  @PostMapping("/register")
 	  public Employees register(@RequestBody Employees employee) {
-		  System.out.println("employee"+employee.getEmail());
 		  Employees employees= employeeService.register(employee);
 		  if(employees!=null) {
 			  return employees;
