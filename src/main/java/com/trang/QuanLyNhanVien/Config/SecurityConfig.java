@@ -61,9 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		});
 		http.authorizeRequests()
 		.antMatchers("/Employee/authenticate","/Employee/login","/Employee/register/**").permitAll()
-//		.antMatchers("/Employee/getPage","/Emplyee/").hasRole("ADMIN")
 		.anyRequest().authenticated()
-//		.and().formLogin().permitAll()
 		.and().exceptionHandling().and().sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		http.addFilterBefore(jwtfilter, UsernamePasswordAuthenticationFilter.class)

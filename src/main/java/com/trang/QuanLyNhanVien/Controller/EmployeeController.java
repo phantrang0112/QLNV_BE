@@ -99,7 +99,7 @@ public class EmployeeController {
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public void DeleteEmployee(@PathVariable("id") int id) {
 		employeeService.deleteByPrimaryKey(id);
-//		System.out.println(userDetails.getUsername());
+
 	}
 //	 @RequestMapping(value="/getPage", method = RequestMethod.GET)
 	@GetMapping("/getPage")

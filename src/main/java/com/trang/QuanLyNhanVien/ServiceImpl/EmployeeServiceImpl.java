@@ -100,15 +100,15 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 		String fileName = multipartFile.getOriginalFilename();
 		try {
 			FileCopyUtils.copy(record.getImg().getBytes(), new File(this.fileUpload + fileName));
+			updateEmployees.setImg(fileName);
+			updateEmployees.setId(record.getId());
+			Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
+			if (employees != null) {
+				employeesMapper.updateByPrimaryKeySelective(updateEmployees);
+				return updateEmployees;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		updateEmployees.setImg(fileName);
-		updateEmployees.setId(record.getId());
-		Employees employees = employeesMapper.selectByPrimaryKey(record.getId());
-		if (employees != null) {
-			employeesMapper.updateByPrimaryKeySelective(updateEmployees);
-			return updateEmployees;
 		}
 		return null;
 	}
