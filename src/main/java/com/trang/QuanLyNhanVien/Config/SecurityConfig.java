@@ -60,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			return configuration;
 		});
 		http.authorizeRequests()
-		.antMatchers("/Employee/authenticate","/Employee/login","/Employee/register/**","/**").permitAll()
+		.antMatchers("/Employee/authenticate","/Employee/login","/Employee/register/**").permitAll()
 //		.antMatchers("/Employee/getPage","/Emplyee/").hasRole("ADMIN")
 		.anyRequest().authenticated()
 //		.and().formLogin().permitAll()
