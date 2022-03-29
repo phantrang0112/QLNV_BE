@@ -86,7 +86,7 @@ public class EmployeeController {
 		return null;
 	}
 	@PutMapping("/edit/{id}")
-	@PreAuthorize("hasAnyRole('ADMIN') ")
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	public Employees EditEmployee(@RequestBody Employees employees, @PathVariable("id")int id){
 		employees.setId(id);
 		int succes =employeeService.updateByPrimaryKeySelective(employees);
