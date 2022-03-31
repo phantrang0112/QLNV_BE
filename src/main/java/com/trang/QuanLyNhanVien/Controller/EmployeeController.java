@@ -102,7 +102,7 @@ public class EmployeeController {
 
 	}
 //	 @RequestMapping(value="/getPage", method = RequestMethod.GET)
-	@GetMapping("/getPage")
+	@GetMapping("/get-page")
 	 public PageInfo<Employees> listEmployees(
 	            @RequestParam(value="page", required=false, defaultValue="1") int page,
 	            @RequestParam(value="page-size", required=false, defaultValue="5") int pageSize){
@@ -137,7 +137,7 @@ public class EmployeeController {
 		  }
 		  return null;
 	  }
-	  @PutMapping("/changepass")
+	  @PutMapping("/change-pass")
 	  @PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EMPLOYEE')")
 	  public  Map<String,Object> changePassword(@RequestBody EmployeeChangePassword employeeChangePassword) {
 		  Map<String, Object> success= employeeService.changePassword(employeeChangePassword);
