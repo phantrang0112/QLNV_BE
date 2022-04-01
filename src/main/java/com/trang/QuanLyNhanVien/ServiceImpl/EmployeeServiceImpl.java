@@ -294,8 +294,6 @@ public class EmployeeServiceImpl implements com.trang.QuanLyNhanVien.Service.Emp
 					paren.put("message", "password update successful!");
 					paren.put("token", jwtUtil.generateToken(employee.getUsername()));
 					return paren;
-				
-					
 				}
 			}
 		}

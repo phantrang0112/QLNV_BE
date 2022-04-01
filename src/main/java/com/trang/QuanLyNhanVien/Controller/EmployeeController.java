@@ -9,6 +9,7 @@ import java.util.Map;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -142,8 +143,7 @@ public class EmployeeController {
 	  public  Map<String,Object> changePassword(@RequestBody EmployeeChangePassword employeeChangePassword) {
 		  Map<String, Object> success= employeeService.changePassword(employeeChangePassword);
 			  return success;
-	  }
-	  @GetMapping("/sort")
+	  }	  @GetMapping("/sort")
 	  public List<Employees> sort(){
 		return null;
 	  }
